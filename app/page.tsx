@@ -3,16 +3,94 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, 
-  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, ComposedChart
+  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, ComposedChart, TooltipProps
 } from 'recharts';
 import { 
   LayoutDashboard, Users, Star, TrendingUp, Calendar, MessageSquare, 
   FileText, ArrowUpRight, ArrowDownRight, Filter, ChevronUp, ChevronDown, Search, Eye, EyeOff, RotateCcw,
-  BadgeCheck, Menu, X
+  BadgeCheck, Menu, X, PieChart as PieChartIcon
 } from 'lucide-react';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
-// --- DATOS DE MUESTRA (Estructura estricta solicitada) ---
-const RAW_DATA = [
+// --- INTERFACES ---
+
+interface RawData {
+  ID_CALIFICACION: number;
+  NOMBRE: string;
+  PUESTO: string | null;
+  URL: string;
+  SERVICIO: string;
+  CALIFICACION: number;
+  COMENTARIO: string;
+  FECHA_REGISTRO: string;
+}
+
+interface KpiData {
+  total: number;
+  promedio: string;
+  nps: number;
+  satisfaccion5: number;
+}
+
+interface DistributionData {
+  name: string;
+  value: number;
+  rawKey: number;
+  [key: string]: any; // Index signature para compatibilidad estricta con Recharts
+}
+
+interface EmployeeData {
+  name: string;
+  fullName: string;
+  puesto: string | null;
+  avatar: string | null;
+  Promedio: number;
+  Atenciones: number;
+  Efectividad: number;
+  // Props adicionales usadas en la lógica de agrupación
+  total?: number;
+  sum?: number;
+  count5?: number;
+  [key: string]: any; // Index signature para compatibilidad estricta con Recharts
+}
+
+interface ServiceData {
+  name: string;
+  Promedio: number;
+  Volumen: number;
+  [key: string]: any; // Index signature para compatibilidad estricta con Recharts
+}
+
+interface TimeData {
+  date: string;
+  sortDate: string;
+  Calidad: number;
+  Volumen: number;
+  [key: string]: any; // Index signature para compatibilidad estricta con Recharts
+}
+
+interface KpiCardProps {
+  title: string;
+  value: string | number;
+  subtext: string;
+  icon: React.ReactNode;
+  trend?: 'positive' | 'neutral' | 'negative';
+}
+
+interface EmployeeCardProps {
+  data: EmployeeData;
+}
+
+type SortDirection = 'asc' | 'desc';
+type SortKey = keyof RawData; 
+
+interface SortConfig {
+  key: SortKey;
+  direction: SortDirection;
+}
+
+// --- DATOS DE MUESTRA ---
+const RAW_DATA: RawData[] = [
 	{
 		"ID_CALIFICACION" : 8,
 		"NOMBRE" : "SANDRA KARINA RINCON MORA",
@@ -7436,7 +7514,7 @@ const RAW_DATA = [
 ];
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-const SATISFACTION_COLORS = {
+const SATISFACTION_COLORS: Record<number, string> = {
   5: '#10B981', // Verde
   4: '#3B82F6', // Azul
   3: '#F59E0B', // Amarillo
@@ -7444,19 +7522,19 @@ const SATISFACTION_COLORS = {
   1: '#EF4444'  // Rojo
 };
 
-// Función auxiliar para convertir fecha "DD.MM.YYYY HH:mm" a objeto Date
-const parseDate = (dateStr) => {
+// Función auxiliar para convertir fecha
+const parseDate = (dateStr: string): Date => {
   if (!dateStr) return new Date();
-  const [datePart, timePart] = dateStr.split(' ');
+  const [datePart] = dateStr.split(' ');
   const [day, month, year] = datePart.split('.');
-  // const [hour, minute] = timePart.split(':'); // Opcional si necesitamos hora exacta
   return new Date(`${year}-${month}-${day}`);
 };
 
 // --- COMPONENTE DE TOOLTIP PERSONALIZADO ---
-const CustomAvatarTooltip = ({ active, payload, label }) => {
+// Se usa 'any' en las props para evitar conflictos de tipos estrictos con Recharts durante el build
+const CustomAvatarTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
+    const data = payload[0].payload as EmployeeData;
     return (
       <div className="bg-white p-4 border border-gray-100 shadow-xl rounded-xl z-50 min-w-[220px]">
         <div className="flex flex-col items-center">
@@ -7466,8 +7544,9 @@ const CustomAvatarTooltip = ({ active, payload, label }) => {
                alt={data.name} 
                className="w-24 h-24 rounded-full object-cover border-4 border-blue-50 shadow-md mb-3"
                onError={(e) => {
-                 e.target.onerror = null; 
-                 e.target.src = "https://ui-avatars.com/api/?name=" + data.name + "&background=random";
+                 const target = e.target as HTMLImageElement;
+                 target.onerror = null; 
+                 target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(data.name) + "&background=random";
                }}
              />
           ) : (
@@ -7505,18 +7584,19 @@ const CustomAvatarTooltip = ({ active, payload, label }) => {
 };
 
 // --- COMPONENTE TARJETA DE EMPLEADO ---
-const EmployeeCard = ({ data }) => {
+const EmployeeCard: React.FC<EmployeeCardProps> = ({ data }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
       <div className="h-24 bg-gradient-to-r from-blue-500 to-blue-600 relative">
         <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
            <img 
-             src={data.avatar} 
+             src={data.avatar || ""} 
              alt={data.fullName}
              className="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover bg-white"
              onError={(e) => {
-                e.target.onerror = null; 
-                e.target.src = "https://ui-avatars.com/api/?name=" + data.fullName + "&background=random";
+                const target = e.target as HTMLImageElement;
+                target.onerror = null; 
+                target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(data.fullName) + "&background=random";
              }}
            />
         </div>
@@ -7552,23 +7632,26 @@ const EmployeeCard = ({ data }) => {
 };
 
 export default function DashboardReporte() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Estado para menú móvil
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'personal' | 'comments'>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   // --- ESTADOS PARA FILTROS Y ORDENAMIENTO ---
-  const [filterService, setFilterService] = useState('Todos');
-  const [filterRating, setFilterRating] = useState('Todos');
-  const [filterPersonal, setFilterPersonal] = useState('Todos');
-  const [sortConfig, setSortConfig] = useState({ key: 'FECHA_REGISTRO', direction: 'desc' });
+  const [filterService, setFilterService] = useState<string>('Todos');
+  const [filterRating, setFilterRating] = useState<string>('Todos');
+  const [filterPersonal, setFilterPersonal] = useState<string>('Todos');
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'FECHA_REGISTRO', direction: 'desc' });
   
-  // Nuevo estado para la visibilidad de los servicios en la gráfica
-  // Se inicializa vacío para que el usuario seleccione manualmente
-  const [visibleServices, setVisibleServices] = useState([]);
+  const [visibleServices, setVisibleServices] = useState<string[]>([]);
+
+  useEffect(() => {
+    const services = Array.from(new Set(RAW_DATA.map(d => d.SERVICIO)));
+    setVisibleServices(services);
+  }, []);
 
   // --- PROCESAMIENTO DE DATOS ---
   
   // 1. KPIs Generales
-  const kpis = useMemo(() => {
+  const kpis = useMemo<KpiData>(() => {
     const total = RAW_DATA.length;
     const promedio = RAW_DATA.reduce((acc, curr) => acc + curr.CALIFICACION, 0) / total;
     const promoters = RAW_DATA.filter(d => d.CALIFICACION === 5).length;
@@ -7583,33 +7666,38 @@ export default function DashboardReporte() {
     };
   }, []);
 
-  // 2. Distribución de Calificaciones (Pie Chart)
-  const distCalificaciones = useMemo(() => {
-    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  // 2. Distribución de Calificaciones
+  const distCalificaciones = useMemo<DistributionData[]>(() => {
+    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     RAW_DATA.forEach(d => counts[d.CALIFICACION] = (counts[d.CALIFICACION] || 0) + 1);
     return Object.keys(counts).map(k => ({
       name: `${k} Estrellas`,
-      value: counts[k],
+      value: counts[parseInt(k)],
       rawKey: parseInt(k)
     })).filter(item => item.value > 0);
   }, []);
 
-  // 3. Desempeño por Empleado (Bar Chart + Line + Cards)
-  const dataEmpleados = useMemo(() => {
-    const grouped = {};
+  // 3. Desempeño por Empleado
+  const dataEmpleados = useMemo<EmployeeData[]>(() => {
+    const grouped: Record<string, EmployeeData & { total: number; sum: number; count5: number }> = {};
     RAW_DATA.forEach(d => {
       const name = d.NOMBRE === "OTRO" ? "OTRO" : d.NOMBRE.split(" ")[0] + " " + d.NOMBRE.split(" ")[1];
       const avatarUrl = d.URL; 
       
-      if (!grouped[name]) grouped[name] = { 
-        name, 
-        total: 0, 
-        sum: 0, 
-        count5: 0, 
-        avatar: avatarUrl, 
-        fullName: d.NOMBRE,
-        puesto: d.PUESTO 
-      };
+      if (!grouped[name]) {
+        grouped[name] = { 
+          name, 
+          total: 0, 
+          sum: 0, 
+          count5: 0, 
+          avatar: avatarUrl, 
+          fullName: d.NOMBRE,
+          puesto: d.PUESTO,
+          Promedio: 0,
+          Atenciones: 0,
+          Efectividad: 0
+        };
+      }
       
       grouped[name].total += 1;
       grouped[name].sum += d.CALIFICACION;
@@ -7627,9 +7715,9 @@ export default function DashboardReporte() {
     })).sort((a, b) => b.Promedio - a.Promedio);
   }, []);
 
-  // 4. Análisis por Servicio (Bar Chart) - DATOS COMPLETOS
-  const dataServiciosCompleta = useMemo(() => {
-    const grouped = {};
+  // 4. Análisis por Servicio - DATOS COMPLETOS
+  const dataServiciosCompleta = useMemo<ServiceData[]>(() => {
+    const grouped: Record<string, { name: string; total: number; sum: number }> = {};
     RAW_DATA.forEach(d => {
       if (!grouped[d.SERVICIO]) grouped[d.SERVICIO] = { name: d.SERVICIO, total: 0, sum: 0 };
       grouped[d.SERVICIO].total += 1;
@@ -7647,18 +7735,17 @@ export default function DashboardReporte() {
     return dataServiciosCompleta.filter(s => visibleServices.includes(s.name));
   }, [dataServiciosCompleta, visibleServices]);
 
-  // Handler para alternar visibilidad
-  const toggleServiceVisibility = (serviceName) => {
+  const toggleServiceVisibility = (serviceName: string) => {
     setVisibleServices(prev => 
       prev.includes(serviceName)
-        ? prev.filter(s => s !== serviceName) // Ocultar
-        : [...prev, serviceName] // Mostrar
+        ? prev.filter(s => s !== serviceName) 
+        : [...prev, serviceName] 
     );
   };
 
-  // 5. Evolución Temporal (Area Chart)
-  const dataTiempo = useMemo(() => {
-    const grouped = {};
+  // 5. Evolución Temporal
+  const dataTiempo = useMemo<TimeData[]>(() => {
+    const grouped: Record<string, { date: string; count: number; sum: number; displayDate: string }> = {};
     RAW_DATA.forEach(d => {
       const dateObj = parseDate(d.FECHA_REGISTRO);
       const dateKey = dateObj.toISOString().split('T')[0];
@@ -7669,7 +7756,7 @@ export default function DashboardReporte() {
     });
     
     return Object.values(grouped)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map(g => ({
         date: g.displayDate,
         sortDate: g.date,
@@ -7679,8 +7766,8 @@ export default function DashboardReporte() {
   }, []);
 
   // --- LOGICA DE FILTRADO Y ORDENAMIENTO (TABLA COMENTARIOS) ---
-  const uniqueServices = useMemo(() => ['Todos', ...new Set(RAW_DATA.map(d => d.SERVICIO).filter(Boolean))].sort(), []);
-  const uniquePersonal = useMemo(() => ['Todos', ...new Set(RAW_DATA.map(d => d.NOMBRE).filter(Boolean))].sort(), []);
+  const uniqueServices = useMemo(() => ['Todos', ...Array.from(new Set(RAW_DATA.map(d => d.SERVICIO).filter(Boolean)))].sort(), []);
+  const uniquePersonal = useMemo(() => ['Todos', ...Array.from(new Set(RAW_DATA.map(d => d.NOMBRE).filter(Boolean)))].sort(), []);
   
   const processedComments = useMemo(() => {
     let data = [...RAW_DATA];
@@ -7690,10 +7777,18 @@ export default function DashboardReporte() {
     if (filterPersonal !== 'Todos') data = data.filter(item => item.NOMBRE === filterPersonal);
 
     data.sort((a, b) => {
-      let aValue = a[sortConfig.key];
-      let bValue = b[sortConfig.key];
-      if (sortConfig.key === 'FECHA_REGISTRO') { aValue = parseDate(a.FECHA_REGISTRO); bValue = parseDate(b.FECHA_REGISTRO); }
-      if (sortConfig.key === 'NOMBRE') { aValue = a.NOMBRE; bValue = b.NOMBRE; }
+      let aValue: any = a[sortConfig.key];
+      let bValue: any = b[sortConfig.key];
+      
+      if (sortConfig.key === 'FECHA_REGISTRO') { 
+        aValue = parseDate(a.FECHA_REGISTRO); 
+        bValue = parseDate(b.FECHA_REGISTRO); 
+      }
+      if (sortConfig.key === 'NOMBRE') { 
+        aValue = a.NOMBRE; 
+        bValue = b.NOMBRE; 
+      }
+
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -7702,18 +7797,17 @@ export default function DashboardReporte() {
     return data;
   }, [filterService, filterRating, filterPersonal, sortConfig]);
 
-  const handleSort = (key) => {
-    let direction = 'asc';
+  const handleSort = (key: SortKey) => {
+    let direction: SortDirection = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
     setSortConfig({ key, direction });
   };
 
-  const getSortIcon = (key) => {
+  const getSortIcon = (key: SortKey) => {
     if (sortConfig.key !== key) return <div className="w-4 h-4 ml-1 opacity-20"><ArrowUpRight size={14}/></div>;
     return sortConfig.direction === 'asc' ? <ChevronUp size={14} className="ml-1 text-blue-600"/> : <ChevronDown size={14} className="ml-1 text-blue-600"/>;
   };
 
-  // Función para resetear filtros
   const resetFilters = () => {
     setFilterService('Todos');
     setFilterRating('Todos');
@@ -7835,7 +7929,7 @@ export default function DashboardReporte() {
               {/* Distribución de Estrellas */}
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 col-span-1">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <PieChart size={18} className="text-gray-400"/> Distribución de Satisfacción
+                  <PieChartIcon size={18} className="text-gray-400"/> Distribución de Satisfacción
                 </h3>
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -8137,7 +8231,12 @@ export default function DashboardReporte() {
                                  src={row.URL} 
                                  alt={row.NOMBRE}
                                  className="h-full w-full object-cover"
-                                 onError={(e) => {e.target.style.display = 'none'; e.target.parentNode.style.backgroundColor = '#e5e7eb';}}
+                                 onError={(e) => {
+                                   const target = e.target as HTMLImageElement;
+                                   target.style.display = 'none';
+                                   const parent = target.parentNode as HTMLElement;
+                                   if (parent) parent.style.backgroundColor = '#e5e7eb';
+                                 }}
                                />
                              </div>
                              <div className="flex flex-col">
@@ -8172,7 +8271,7 @@ export default function DashboardReporte() {
                      ))
                    ) : (
                      <tr>
-                       <td colSpan="5" className="px-6 py-12 text-center text-gray-400">
+                       <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
                          <div className="flex flex-col items-center">
                            <Search size={32} className="mb-2 opacity-50"/>
                            <p>No se encontraron comentarios con estos filtros.</p>
@@ -8206,7 +8305,7 @@ export default function DashboardReporte() {
 }
 
 // Componente auxiliar para Tarjetas KPI
-function KpiCard({ title, value, subtext, icon, trend }) {
+const KpiCard: React.FC<KpiCardProps> = ({ title, value, subtext, icon, trend }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start justify-between">
       <div>
