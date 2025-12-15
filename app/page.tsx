@@ -7683,7 +7683,8 @@ export default function DashboardReporte() {
   const dataEmpleados = useMemo<EmployeeData[]>(() => {
     const grouped: Record<string, EmployeeData & { total: number; sum: number; count5: number }> = {};
     RAW_DATA.forEach(d => {
-      const name = d.NOMBRE === "OTRO" ? "OTRO" : d.NOMBRE.split(" ")[0] + " " + d.NOMBRE.split(" ")[1];
+      // Cambio: Usar el nombre completo literal para evitar agrupaciones accidentales
+      const name = d.NOMBRE;
       const avatarUrl = d.URL; 
       
       if (!grouped[name]) {
@@ -7988,8 +7989,8 @@ export default function DashboardReporte() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
               {/* Desempeño por Personal */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                <div className="flex justify-between items-center mb-4">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-[500px]">
+                <div className="flex justify-between items-center mb-4 flex-shrink-0">
                   <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                     <Users size={18} className="text-gray-400"/> Desempeño por Personal
                   </h3>
@@ -8007,28 +8008,31 @@ export default function DashboardReporte() {
                   )}
                 </div>
                 
-                <div className="h-80 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      layout="vertical"
-                      data={dataEmpleados}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                      <XAxis type="number" domain={[0, 5]} hide />
-                      <YAxis dataKey="name" type="category" width={140} tick={{fontSize: 11}} />
-                      {/* TOOLTIP PERSONALIZADO ACTIVADO AQUI */}
-                      <RechartsTooltip content={<CustomAvatarTooltip />} cursor={{fill: 'rgba(59, 130, 246, 0.1)'}} />
-                      <Legend />
-                      <Bar dataKey="Promedio" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={20} name="Calif. Promedio">
-                         {
-                            dataEmpleados.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.Promedio >= 4.5 ? '#10B981' : entry.Promedio >= 4 ? '#3B82F6' : '#EF4444'} />
-                            ))
-                          }
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                {/* Contenedor con Scroll para evitar desbordamiento */}
+                <div className="flex-1 overflow-y-auto pr-2">
+                  <div style={{ height: Math.max(300, dataEmpleados.length * 60) }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        layout="vertical"
+                        data={dataEmpleados}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                        <XAxis type="number" domain={[0, 5]} hide />
+                        <YAxis dataKey="name" type="category" width={140} tick={{fontSize: 11}} interval={0} />
+                        {/* TOOLTIP PERSONALIZADO ACTIVADO AQUI */}
+                        <RechartsTooltip content={<CustomAvatarTooltip />} cursor={{fill: 'rgba(59, 130, 246, 0.1)'}} />
+                        <Legend />
+                        <Bar dataKey="Promedio" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={20} name="Calif. Promedio">
+                           {
+                              dataEmpleados.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.Promedio >= 4.5 ? '#10B981' : entry.Promedio >= 4 ? '#3B82F6' : '#EF4444'} />
+                              ))
+                            }
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
 
