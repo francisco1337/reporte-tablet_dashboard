@@ -7641,12 +7641,14 @@ export default function DashboardReporte() {
   const [filterPersonal, setFilterPersonal] = useState<string>('Todos');
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'FECHA_REGISTRO', direction: 'desc' });
   
+  // Se inicializa vacío para que el usuario seleccione manualmente
   const [visibleServices, setVisibleServices] = useState<string[]>([]);
 
-  useEffect(() => {
-    const services = Array.from(new Set(RAW_DATA.map(d => d.SERVICIO)));
-    setVisibleServices(services);
-  }, []);
+  // Eliminado el useEffect que seleccionaba todos los servicios por defecto
+  // useEffect(() => {
+  //   const services = Array.from(new Set(RAW_DATA.map(d => d.SERVICIO)));
+  //   setVisibleServices(services);
+  // }, []);
 
   // --- PROCESAMIENTO DE DATOS ---
   
