@@ -7861,7 +7861,7 @@ export default function DashboardReporte() {
                 <div className="mt-4 text-center">
                   <p className="text-sm text-gray-500">
                     La mayoría de los usuarios califican con 
-                    <span className="font-bold text-gray-800"> {distCalificaciones.sort((a,b) => b.value - a.value)[0]?.name}</span>.
+                    <span className="font-bold text-gray-800"> {[...distCalificaciones].sort((a,b) => b.value - a.value)[0]?.name}</span>.
                   </p>
                 </div>
               </div>
