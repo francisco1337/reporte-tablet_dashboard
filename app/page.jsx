@@ -8,7 +8,7 @@ import {
 import { 
   LayoutDashboard, Users, Star, TrendingUp, Calendar, MessageSquare, 
   FileText, ArrowUpRight, ArrowDownRight, Filter, ChevronUp, ChevronDown, Search, Eye, EyeOff, RotateCcw,
-  BadgeCheck, User
+  BadgeCheck, Menu, X
 } from 'lucide-react';
 
 // --- DATOS DE MUESTRA (Estructura estricta solicitada) ---
@@ -7504,7 +7504,7 @@ const CustomAvatarTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-// --- COMPONENTE TARJETA DE EMPLEADO (NUEVO) ---
+// --- COMPONENTE TARJETA DE EMPLEADO ---
 const EmployeeCard = ({ data }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
@@ -7553,6 +7553,7 @@ const EmployeeCard = ({ data }) => {
 
 export default function DashboardReporte() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Estado para menú móvil
 
   // --- ESTADOS PARA FILTROS Y ORDENAMIENTO ---
   const [filterService, setFilterService] = useState('Todos');
@@ -7561,13 +7562,8 @@ export default function DashboardReporte() {
   const [sortConfig, setSortConfig] = useState({ key: 'FECHA_REGISTRO', direction: 'desc' });
   
   // Nuevo estado para la visibilidad de los servicios en la gráfica
+  // Se inicializa vacío para que el usuario seleccione manualmente
   const [visibleServices, setVisibleServices] = useState([]);
-
-  // Inicializar los servicios visibles al cargar
-  useEffect(() => {
-    const services = [...new Set(RAW_DATA.map(d => d.SERVICIO))];
-    setVisibleServices(services);
-  }, []);
 
   // --- PROCESAMIENTO DE DATOS ---
   
@@ -7603,7 +7599,6 @@ export default function DashboardReporte() {
     const grouped = {};
     RAW_DATA.forEach(d => {
       const name = d.NOMBRE === "OTRO" ? "OTRO" : d.NOMBRE.split(" ")[0] + " " + d.NOMBRE.split(" ")[1];
-      // Para la vista de cartas, queremos conservar la URL incluso para OTRO
       const avatarUrl = d.URL; 
       
       if (!grouped[name]) grouped[name] = { 
@@ -7613,7 +7608,7 @@ export default function DashboardReporte() {
         count5: 0, 
         avatar: avatarUrl, 
         fullName: d.NOMBRE,
-        puesto: d.PUESTO // Capturamos el puesto
+        puesto: d.PUESTO 
       };
       
       grouped[name].total += 1;
@@ -7729,8 +7724,8 @@ export default function DashboardReporte() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+      {/* Header RESPONSIVO */}
+      <header className="bg-white shadow-sm sticky top-0 z-10 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="bg-blue-600 p-2 rounded-lg text-white">
@@ -7741,7 +7736,9 @@ export default function DashboardReporte() {
               <p className="text-xs text-gray-500">Tablets de Satisfacción • Oct-Dic 2025</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          
+          {/* Navegación Desktop */}
+          <div className="hidden md:flex gap-2">
             <button 
               onClick={() => setActiveTab('dashboard')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -7761,14 +7758,46 @@ export default function DashboardReporte() {
               Comentarios
             </button>
           </div>
+
+          {/* Botón Menú Móvil */}
+          <button 
+             className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {/* Menú Desplegable Móvil */}
+        {isMobileMenuOpen && (
+           <div className="md:hidden bg-white border-t border-gray-100 absolute w-full left-0 top-full shadow-lg z-20 px-4 py-4 flex flex-col gap-2 animate-in slide-in-from-top-2 duration-200">
+              <button 
+                onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
+                className={`px-4 py-3 rounded-md text-sm font-medium text-left transition-colors flex items-center gap-3 ${activeTab === 'dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                <LayoutDashboard size={18} /> Dashboard
+              </button>
+              <button 
+                onClick={() => { setActiveTab('personal'); setIsMobileMenuOpen(false); }}
+                className={`px-4 py-3 rounded-md text-sm font-medium text-left transition-colors flex items-center gap-3 ${activeTab === 'personal' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                <BadgeCheck size={18} /> Personal
+              </button>
+              <button 
+                onClick={() => { setActiveTab('comments'); setIsMobileMenuOpen(false); }}
+                className={`px-4 py-3 rounded-md text-sm font-medium text-left transition-colors flex items-center gap-3 ${activeTab === 'comments' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                <MessageSquare size={18} /> Comentarios
+              </button>
+           </div>
+        )}
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* --- PESTAÑA DASHBOARD --- */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in duration-300">
             
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -7965,9 +7994,9 @@ export default function DashboardReporte() {
           </div>
         )}
 
-        {/* --- PESTAÑA PERSONAL (NUEVA) --- */}
+        {/* --- PESTAÑA PERSONAL --- */}
         {activeTab === 'personal' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in duration-300">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                  <BadgeCheck className="text-blue-600" /> Directorio de Personal y Desempeño
@@ -7987,7 +8016,7 @@ export default function DashboardReporte() {
 
         {/* --- PESTAÑA COMENTARIOS --- */}
         {activeTab === 'comments' && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col min-h-[600px]">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col min-h-[600px] animate-in fade-in duration-300">
              <div className="p-6 border-b border-gray-100 flex justify-between items-center flex-wrap gap-4">
                 <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                   <MessageSquare size={18} className="text-gray-400"/> Explorador de Comentarios
