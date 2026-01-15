@@ -10,16 +10,16 @@ import {
   Activity, PieChart as PieIcon, ShieldCheck, Download, Search, ArrowUpDown, ArrowUp, ArrowDown
 } from 'lucide-react';
 
-// Datos de ejemplo actualizados con CLAVE_ORGANICA_0
+// Datos de ejemplo completos con todas las columnas del archivo
 const SAMPLE_DATA = [
-  { INTERNO: "84358", CAPITAL: "52000", PLAZO: "55", FOTORGAMIENTO: "2025-12-05", SEGURO: "317.92", CLAVE_ORGANICA_0: "04", CLAVE_ORGANICA_1: "24", STATUS: "A" },
-  { INTERNO: "63939", CAPITAL: "50000", PLAZO: "50", FOTORGAMIENTO: "2025-12-05", SEGURO: "277.31", CLAVE_ORGANICA_0: "04", CLAVE_ORGANICA_1: "24", STATUS: "A" },
-  { INTERNO: "41522", CAPITAL: "61910", PLAZO: "50", FOTORGAMIENTO: "2025-12-08", SEGURO: "342.25", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "04", STATUS: "A" },
-  { INTERNO: "61690", CAPITAL: "23000", PLAZO: "24", FOTORGAMIENTO: "2026-01-13", SEGURO: "120.50", CLAVE_ORGANICA_0: "02", CLAVE_ORGANICA_1: "06", STATUS: "A" },
-  { INTERNO: "15638", CAPITAL: "12000", PLAZO: "11", FOTORGAMIENTO: "2026-01-13", SEGURO: "163.92", CLAVE_ORGANICA_0: "04", CLAVE_ORGANICA_1: "04", STATUS: "A" },
-  { INTERNO: "61872", CAPITAL: "52000", PLAZO: "40", FOTORGAMIENTO: "2026-01-13", SEGURO: "563.17", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "24", STATUS: "A" },
-  { INTERNO: "81151", CAPITAL: "52000", PLAZO: "40", FOTORGAMIENTO: "2026-01-14", SEGURO: "468.33", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "07", STATUS: "A" },
-  { INTERNO: "42209", CAPITAL: "35000", PLAZO: "41", FOTORGAMIENTO: "2026-01-14", SEGURO: "210.00", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "20", STATUS: "A" },
+  { INTERNO: "84358", NO_PRESTAMO: "3", CLAVE_ORGANICA_0: "04", CLAVE_ORGANICA_1: "24", CLAVE_ORGANICA_2: "01", CLAVE_ORGANICA_3: "01", CAPITAL: "52000", PLAZO: "55", FSOLICITUD: "2025-12-05", FOTORGAMIENTO: "2025-12-05", STATUS: "A", SEGURO: "317.92", TOTAL_RESPALDO_SEG: "51992.1", FECHA_INICIO: "2026-04-30", FECHA_FIN: "2028-07-31" },
+  { INTERNO: "63939", NO_PRESTAMO: "123", CLAVE_ORGANICA_0: "04", CLAVE_ORGANICA_1: "24", CLAVE_ORGANICA_2: "01", CLAVE_ORGANICA_3: "01", CAPITAL: "50000", PLAZO: "50", FSOLICITUD: "2025-12-05", FOTORGAMIENTO: "2025-12-05", STATUS: "A", SEGURO: "277.31", TOTAL_RESPALDO_SEG: "50000", FECHA_INICIO: "2026-07-31", FECHA_FIN: "2028-08-15" },
+  { INTERNO: "41522", NO_PRESTAMO: "20", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "04", CLAVE_ORGANICA_2: "01", CLAVE_ORGANICA_3: "01", CAPITAL: "61910", PLAZO: "50", FSOLICITUD: "2025-12-08", FOTORGAMIENTO: "2025-12-08", STATUS: "A", SEGURO: "342.25", TOTAL_RESPALDO_SEG: "61800.2", FECHA_INICIO: "2026-11-15", FECHA_FIN: "2028-11-30" },
+  { INTERNO: "61690", NO_PRESTAMO: "200", CLAVE_ORGANICA_0: "02", CLAVE_ORGANICA_1: "06", CLAVE_ORGANICA_2: "04", CLAVE_ORGANICA_3: "03", CAPITAL: "23000", PLAZO: "24", FSOLICITUD: "2026-01-13", FOTORGAMIENTO: "2026-01-13", STATUS: "A", SEGURO: "120.50", TOTAL_RESPALDO_SEG: "23000", FECHA_INICIO: "2026-11-30", FECHA_FIN: "2027-04-15" },
+  { INTERNO: "15638", NO_PRESTAMO: "256", CLAVE_ORGANICA_0: "04", CLAVE_ORGANICA_1: "04", CLAVE_ORGANICA_2: "60", CLAVE_ORGANICA_3: "47", CAPITAL: "12000", PLAZO: "11", FSOLICITUD: "2026-01-13", FOTORGAMIENTO: "2026-01-13", STATUS: "A", SEGURO: "163.92", TOTAL_RESPALDO_SEG: "12000", FECHA_INICIO: "2028-08-15", FECHA_FIN: "2029-01-15" },
+  { INTERNO: "61872", NO_PRESTAMO: "41", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "24", CLAVE_ORGANICA_2: "00", CLAVE_ORGANICA_3: "00", CAPITAL: "52000", PLAZO: "40", FSOLICITUD: "2026-01-13", FOTORGAMIENTO: "2026-01-13", STATUS: "A", SEGURO: "563.17", TOTAL_RESPALDO_SEG: "51853.7", FECHA_INICIO: "2027-05-15", FECHA_FIN: "2028-12-31" },
+  { INTERNO: "81151", NO_PRESTAMO: "5", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "07", CLAVE_ORGANICA_2: "06", CLAVE_ORGANICA_3: "00", CAPITAL: "52000", PLAZO: "40", FSOLICITUD: "2026-01-14", FOTORGAMIENTO: "2026-01-14", STATUS: "A", SEGURO: "468.33", TOTAL_RESPALDO_SEG: "44652.9", FECHA_INICIO: "2027-05-31", FECHA_FIN: "2029-01-15" },
+  { INTERNO: "42209", NO_PRESTAMO: "227", CLAVE_ORGANICA_0: "01", CLAVE_ORGANICA_1: "20", CLAVE_ORGANICA_2: "03", CLAVE_ORGANICA_3: "00", CAPITAL: "35000", PLAZO: "41", FSOLICITUD: "2026-01-14", FOTORGAMIENTO: "2026-01-14", STATUS: "A", SEGURO: "210.00", TOTAL_RESPALDO_SEG: "35000", FECHA_INICIO: "2026-02-15", FECHA_FIN: "2029-02-28" },
 ];
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -157,8 +157,8 @@ const DashboardPage = () => {
         let valA = a[sortConfig.key];
         let valB = b[sortConfig.key];
 
-        // Manejo especial para números y fechas
-        if (['CAPITAL', 'SEGURO', 'PLAZO', 'INTERNO'].includes(sortConfig.key)) {
+        // Manejo especial para números
+        if (['CAPITAL', 'SEGURO', 'PLAZO', 'INTERNO', 'NO_PRESTAMO', 'TOTAL_RESPALDO_SEG'].includes(sortConfig.key)) {
             valA = parseFloat(valA) || 0;
             valB = parseFloat(valB) || 0;
         }
@@ -356,7 +356,7 @@ const DashboardPage = () => {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
                     <input 
                       type="text" 
-                      placeholder="Buscar interno, clave..." 
+                      placeholder="Buscar en todos los campos..." 
                       className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={filterText}
                       onChange={(e) => setFilterText(e.target.value)}
@@ -371,43 +371,65 @@ const DashboardPage = () => {
 
             {/* Cuerpo de la Tabla con Scroll */}
             <div className="overflow-auto flex-1">
-                <table className="w-full text-sm text-left relative">
+                <table className="w-full text-sm text-left relative min-w-[1500px]">
                     <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
                         <tr>
-                            <th className="px-6 py-3 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('INTERNO')}>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 min-w-[100px]" onClick={() => requestSort('INTERNO')}>
                               <div className="flex items-center gap-1">Interno {getSortIcon('INTERNO')}</div>
                             </th>
-                            <th className="px-6 py-3 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('FOTORGAMIENTO')}>
-                              <div className="flex items-center gap-1">Fecha {getSortIcon('FOTORGAMIENTO')}</div>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 min-w-[100px]" onClick={() => requestSort('NO_PRESTAMO')}>
+                              <div className="flex items-center gap-1">No. Prest {getSortIcon('NO_PRESTAMO')}</div>
                             </th>
-                            <th className="px-6 py-3 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('CLAVE_ORGANICA_1')}>
-                              <div className="flex items-center gap-1">Org (0-1) {getSortIcon('CLAVE_ORGANICA_1')}</div>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 min-w-[120px]" onClick={() => requestSort('FSOLICITUD')}>
+                              <div className="flex items-center gap-1">F. Solicitud {getSortIcon('FSOLICITUD')}</div>
                             </th>
-                            <th className="px-6 py-3 text-right cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('PLAZO')}>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 min-w-[120px]" onClick={() => requestSort('FOTORGAMIENTO')}>
+                              <div className="flex items-center gap-1">F. Otorg. {getSortIcon('FOTORGAMIENTO')}</div>
+                            </th>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100" onClick={() => requestSort('CLAVE_ORGANICA_0')}>Org 0</th>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100" onClick={() => requestSort('CLAVE_ORGANICA_1')}>Org 1</th>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100" onClick={() => requestSort('CLAVE_ORGANICA_2')}>Org 2</th>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100" onClick={() => requestSort('CLAVE_ORGANICA_3')}>Org 3</th>
+                            <th className="px-4 py-3 text-right cursor-pointer hover:bg-slate-100" onClick={() => requestSort('PLAZO')}>
                               <div className="flex items-center justify-end gap-1">Plazo {getSortIcon('PLAZO')}</div>
                             </th>
-                            <th className="px-6 py-3 text-right cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('CAPITAL')}>
+                            <th className="px-4 py-3 text-right cursor-pointer hover:bg-slate-100 min-w-[120px]" onClick={() => requestSort('CAPITAL')}>
                               <div className="flex items-center justify-end gap-1">Capital {getSortIcon('CAPITAL')}</div>
                             </th>
-                            <th className="px-6 py-3 text-right cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('SEGURO')}>
+                            <th className="px-4 py-3 text-right cursor-pointer hover:bg-slate-100 min-w-[120px]" onClick={() => requestSort('SEGURO')}>
                               <div className="flex items-center justify-end gap-1">Seguro {getSortIcon('SEGURO')}</div>
                             </th>
-                            <th className="px-6 py-3 text-center">Status</th>
+                             <th className="px-4 py-3 text-right cursor-pointer hover:bg-slate-100 min-w-[120px]" onClick={() => requestSort('TOTAL_RESPALDO_SEG')}>
+                              <div className="flex items-center justify-end gap-1">Respaldo {getSortIcon('TOTAL_RESPALDO_SEG')}</div>
+                            </th>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 min-w-[120px]" onClick={() => requestSort('FECHA_INICIO')}>
+                              <div className="flex items-center gap-1">F. Inicio {getSortIcon('FECHA_INICIO')}</div>
+                            </th>
+                            <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 min-w-[120px]" onClick={() => requestSort('FECHA_FIN')}>
+                              <div className="flex items-center gap-1">F. Fin {getSortIcon('FECHA_FIN')}</div>
+                            </th>
+                            <th className="px-4 py-3 text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {processedTableData.length > 0 ? (
                           processedTableData.map((row, idx) => (
                               <tr key={idx} className="bg-white border-b hover:bg-slate-50">
-                                  <td className="px-6 py-4 font-medium text-slate-900">{row.INTERNO}</td>
-                                  <td className="px-6 py-4">{row.FOTORGAMIENTO}</td>
-                                  <td className="px-6 py-4">
-                                      {row.CLAVE_ORGANICA_0}-{row.CLAVE_ORGANICA_1}
-                                  </td>
-                                  <td className="px-6 py-4 text-right">{row.PLAZO}</td>
-                                  <td className="px-6 py-4 text-right font-medium text-blue-600">{formatCurrency(row.CAPITAL)}</td>
-                                  <td className="px-6 py-4 text-right text-emerald-600">{formatCurrency(row.SEGURO)}</td>
-                                  <td className="px-6 py-4 text-center">
+                                  <td className="px-4 py-3 font-medium text-slate-900">{row.INTERNO}</td>
+                                  <td className="px-4 py-3 text-slate-500">{row.NO_PRESTAMO}</td>
+                                  <td className="px-4 py-3 text-xs">{row.FSOLICITUD}</td>
+                                  <td className="px-4 py-3 text-xs">{row.FOTORGAMIENTO}</td>
+                                  <td className="px-4 py-3 text-center">{row.CLAVE_ORGANICA_0}</td>
+                                  <td className="px-4 py-3 text-center">{row.CLAVE_ORGANICA_1}</td>
+                                  <td className="px-4 py-3 text-center">{row.CLAVE_ORGANICA_2}</td>
+                                  <td className="px-4 py-3 text-center">{row.CLAVE_ORGANICA_3}</td>
+                                  <td className="px-4 py-3 text-right">{row.PLAZO}</td>
+                                  <td className="px-4 py-3 text-right font-medium text-blue-600">{formatCurrency(row.CAPITAL)}</td>
+                                  <td className="px-4 py-3 text-right text-emerald-600">{formatCurrency(row.SEGURO)}</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{formatCurrency(row.TOTAL_RESPALDO_SEG)}</td>
+                                  <td className="px-4 py-3 text-xs">{row.FECHA_INICIO}</td>
+                                  <td className="px-4 py-3 text-xs">{row.FECHA_FIN}</td>
+                                  <td className="px-4 py-3 text-center">
                                       <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded border border-green-200">
                                           {row.STATUS}
                                       </span>
@@ -416,7 +438,7 @@ const DashboardPage = () => {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="7" className="px-6 py-8 text-center text-slate-400">
+                            <td colSpan="15" className="px-6 py-8 text-center text-slate-400">
                               No se encontraron resultados para "{filterText}"
                             </td>
                           </tr>
